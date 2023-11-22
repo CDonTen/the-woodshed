@@ -1,0 +1,404 @@
+https://dashboard.metered.ca/login
+dcallele@experiencefirstdesign.com !Nedtest2023
+https://www.metered.ca/docs/Video-Calls/JavaScript/Building-a-Group-Video%E2%80%93Calling-Application
+https://github.com/metered-ca/video-javascript-quickstart
+https://www.metered.ca/docs/Tips-and-Best-Practices/
+https://www.metered.ca/docs/Video-Calls/JavaScript/basic-guide/
+
+
+https://simpl.info/getusermedia/sources/
+
+Video save links
+https://web.dev/articles/getusermedia-intro
+https://w3c.github.io/mediacapture-main/getusermedia.html#examples
+https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API/Recording_a_media_element
+https://live.mdnplay.dev/en-US/docs/Web/API/MediaStream_Recording_API/Recording_a_media_element/_sample_.Example_of_recording_a_media_element.html?id=Example_of_recording_a_media_element&amp;url=%2Fen-US%2Fdocs%2FWeb%2FAPI%2FMediaStream_Recording_API%2FRecording_a_media_element
+https://github.com/edouardkombo/jsHtml5VideoRecorder
+https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Signaling_and_video_calling
+https://developer.mozilla.org/en-US/docs/Web/Media/Formats/WebRTC_codecs
+https://datatracker.ietf.org/doc/html/rfc8445
+https://webrtc.org/getting-started/media-devices
+https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices
+https://flaviocopes.com/getusermedia/
+https://www.geeksforgeeks.org/web-api-webrtc-getusermedia-method/
+https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+https://w3c.github.io/mediacapture-main/#dom-mediadevices-getusermedia
+https://w3c.github.io/mediacapture-main/#def-constraint-frameRate
+https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getSupportedConstraints
+
+
+https://stackoverflow.com/questions/52375284/navigator-mediadevice-getusermedia-how-to-access-the-actual-stream
+
+    const video = document.querySelector('video');
+
+    async function stream() {
+      
+      try {
+        const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: { width: 1280, height: 720 } })
+        video.srcObject = mediaStream;
+      } catch (e) {
+        console.error(e)
+      }
+      video.onloadedmetadata = async function(event) {
+        try {
+          await video.play();
+        } catch (e) {
+          console.error(e)
+        }
+      }
+    }
+
+    stream()
+<video></video>
+
+
+
+// *****************************
+// Video Resolutions
+// 320 * 180
+// 426 * 240
+// 640 * 360
+// 640 * 480
+// 854 * 480
+// 1280 * 720
+// 1920 * 1080
+// *****************************
+
+// Create a custom video track
+var constraints = {
+  audio: false,
+  video: {
+    width: { min: 320, max: 320 },
+    height: { min: 480, max: 640},
+  },
+};
+const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+var tmp = mediaStream.getTracks();
+const track = mediaStream.getTracks()[0];
+gLocalVideoStream = new MediaStream([track]);
+var vHeight = gLocalVideoStream.getVideoTracks()[0].getSettings().height;
+var vWidth = gLocalVideoStream.getVideoTracks()[0].getSettings().width;
+// This is an undoumented Metered SDK method that allows you to share custom video tracks, so instead of calling the startVideo() method you would call this method and send it the track
+meteredSDK.shareCustomVideoTrack(track);
+
+// https://www.metered.ca/docs/SDK-Reference/JavaScript/Events/participantLeft
+meeting.on("participantLeft", function(participantInfo) {
+  nedCareLog("participant has left the room", participantInfo);
+  // Just interating over all the video tags associate with the participant
+  // and remove them
+  Array.from(document.getElementsByClassName(participantInfo._id)).forEach(
+    function(element) {
+        element.remove();
+    });
+});
+
+
+var tracks = null;
+tracks = gLocalVideoStream.getTracks();
+tracks.forEach(function (track) {
+  track.stop();
+  // track.removeTrack(); // DJC
+  nedCareLog("Meeting cleanup: Stopping local video track");
+}) // forEach
+tracks = gRemoteVideoStream.getTracks();
+tracks.forEach(function (track) {
+  track.stop();
+  // track.removeTrack(); // DJC
+  nedCareLog("Meeting cleanup: Stopping remote video track");
+}) // forEach
+
+DRAGGABLE EFFORTS THAT DID NOT WORK
+  // https://stackoverflow.com/questions/4127118/can-you-detect-dragging-in-jquery
+  // $("#secondaryVideo").on('touchstart mousedown', function(ev) {
+  //   ev.preventDefault();
+  //   $(this).on("touchmove mousemove",function(e){
+  //       var x = e.pageX || e.changedTouches[0].pageX;
+  //       var y = e.pageY || e.changedTouches[0].pageY;
+  //       var p1 = { x: x, y: y };
+  //       var p0 = $(this).data("p0") || p1;
+  //       nedCareLog("dragging from x:" + p0.x + " y:" + p0.y + "to x:" + p1.x + " y:" + p1.y);
+  //       $(this).data("p0", p0);
+  //   });
+  // }).on('touchend mouseup', function(ev) {
+  //     ev.preventDefault();
+  //     $(this).off("touchmove mousemove");
+  // });
+
+  // https://html-online.com/articles/detecting-mousedown-dektop-touchstart-mobile-devices-javascript/
+  // var isTouchDevice = 'ontouchstart' in document.documentElement;
+  // var $dragging = null;
+    
+  // $("#secondaryVideo").mousedown(function(e) {
+  //   if (isTouchDevice == false) {   
+  //     $(this).attr('unselectable', 'on').addClass('draggable');
+  //     var el_w = $('.draggable').outerWidth(),
+  //         el_h = $('.draggable').outerHeight();
+  //     $('#secondaryVideo').on("mousemove", function(e) {
+  //         if ($dragging) {
+  //             $dragging.offset({
+  //                 top: e.pageY - el_h / 2,
+  //                 left: e.pageX - el_w / 2
+  //             });
+  //         }
+  //     });
+  //     $dragging = $(e.target);
+  //     e.stopPropagation();
+  //     e.preventDefault();
+  //   }
+  // });
+  // $("#secondaryVideo").mouseup(function(e) {
+  //   if (isTouchDevice == false) {   
+  //     $dragging = null;
+  //     $(this).removeAttr('unselectable').removeClass('draggable');
+  //     e.stopPropagation();
+  //     e.preventDefault();
+  //   }
+  // });
+  // $('#secondaryVideo').on('touchstart', function(e){
+  //   if (isTouchDevice)  {   
+  //     $(this).attr('unselectable', 'on').addClass('draggable');
+  //     var el_w = $('.draggable').outerWidth(),
+  //         el_h = $('.draggable').outerHeight();
+  //     $('#secondaryVideo').on("mousemove", function(e) {
+  //         if ($dragging) {
+  //             $dragging.offset({
+  //                 top: e.pageY - el_h / 2,
+  //                 left: e.pageX - el_w / 2
+  //             });
+  //         }
+  //     });
+  //     $dragging = $(e.target);
+  //     e.stopPropagation();
+  //     e.preventDefault();
+  //   }
+  // });
+  // $('#secondaryVideo').on('touchend', function(e){
+  //   if (isTouchDevice)  {   
+  //     $dragging = null;
+  //     $(this).removeAttr('unselectable').removeClass('draggable');
+  //     e.stopPropagation();
+  //     e.preventDefault();
+  //   }
+  // });
+
+  https://stackoverflow.com/questions/4780837/is-there-an-equivalent-to-e-pagex-position-for-touchstart-event-as-there-is-fo
+  
+
+  https://stackoverflow.com/questions/12336639/javascript-drag-from-mouse-position
+
+ORIGINAL
+    xPos = drag.offsetWidth / 2;
+    yPos = drag.offsetHeight / 2;
+    drag.addEventListener("touchmove", function() {
+        event.preventDefault();
+        $(this).css({
+            "left" : event.targetTouches[0].pageX - xPos + "px", 
+            "top" : event.targetTouches[0].pageY - yPos + "px",
+            "z-index" : "1000"
+        });
+        $("div").not(this).css("z-index", "1"); 
+        $("div[id]").each(function() {
+            var id = $(this).attr("id");
+            localStorage.setItem(id + "-z","1");
+        });     
+    });
+
+SOLUTION
+drag.addEventListener("touchstart", function() {
+    left = event.targetTouches[0].pageX - $(this).offset().left;
+    top = event.targetTouches[0].pageY - $(this).offset().top;
+});
+drag.addEventListener("touchmove", function() {
+    $(this).css({
+        "left" : event.targetTouches[0].pageX - left + "px", 
+        "top" :  event.targetTouches[0].pageY - top + "px",
+    });
+});
+
+var vHeight = gRemoteVideoStream.getVideoTracks();
+var vHeight1 = vHeight[0];
+var vHeight2 = vHeight1.getSettings();
+var vHeight3 = vHeight2.height;
+// var vHeight = gRemoteVideoStream.getVideoTracks()[0].getSettings().height;
+var vWidth = gRemoteVideoStream.getVideoTracks()[0].getSettings().width;
+nedCareLog("Remote Video Stream Height Setting: " + vHeight);
+nedCareLog("Remote Video Stream Width Setting: " + vWidth);
+
+CONFERENCE REWORK
+
+remoteTrackStarted
+
+      // IdString += "container";
+      // var el = document.getElementById(IdString);
+      // el.style.display = '';
+
+      // // Save the track for further manipulation
+      // gConferenceParticipantsVideo.set(trackItem.participantSessionId, trackItem);
+      // nedCareLog("Current Video Keys: " +  gConferenceParticipantsVideo.keys());
+      
+      // for (const key of gConferenceParticipantsVideo.keys()) {
+      //   nedCareLog("Key: " + key + ", Screen: " + gRemoteParticipantCount);
+      //   IdString = "video" + gRemoteParticipantCount;
+      //   var videoSrc = document.getElementById(IdString);
+      //   if (videoSrc.srcObject === null)
+      //   {
+      //     // this video is not yet being rendered, so continue
+      //     nedCareLog("Adding video stream " + gRemoteParticipantCount + ": " + key);
+      //     // This participant has not been processed already
+      //     nedCareLog("Adding video stream: " + key);
+      //     var curTrack = gConferenceParticipantsVideo.get(key).track;
+      //     var curMediaStream = new MediaStream([curTrack]);
+      //     document.getElementById(IdString).srcObject = curMediaStream;
+
+      //     playPromise = document.getElementById(IdString).play();
+      //     if (playPromise !== undefined) {
+      //       playPromise.then(_ => {
+      //           nedCareLog('Remote video track conference started');
+      //       })
+      //       .catch(error => {
+      //         nedCareLog('Remote video track conference started promise failed');
+      //       });
+      //     }
+
+      //     // Make the container visible
+      //     IdString += "container";
+      //     var el = document.getElementById(IdString);
+      //     el.style.display = '';
+      //   } else {
+      //     nedCareLog("Video stream " + gRemoteParticipantCount + " already present");
+      //   }
+      //   gRemoteParticipantCount++;
+      // }
+
+    // if (gRemoteParticipantCount > -1) {
+    //   nedCareLog("8. Conference layout: " + gRemoteParticipantCount + ", " + trackItem.participantSessionId);
+    //   $('#nedCareVideoContainer').fadeOut(gFadeTime, function () {
+    //     $('#video0Container').fadeIn(gFadeTime);
+    //     $('#nedCareVideoConferenceContainer').fadeIn(gFadeTime);
+    //   });
+    // } else {
+    //   nedCareLog("9. Pair layout: " + gRemoteParticipantCount + ", " + trackItem.participantSessionId);
+    //   $('#video0Container').fadeOut(gFadeTime);
+    //   $('#nedCareVideoConferenceContainer').fadeOut(gFadeTime, function () {
+    //     $('#nedCareVideoContainer').fadeIn(gFadeTime);
+    //   });
+    // }
+
+      // IdString += "container";
+      // var el = document.getElementById(IdString);
+      // el.style.display = '';
+      // if (gRemoteParticipantCount > 1) {
+      //   $('#nedCareVideoContainer').fadeOut(gFadeTime, function () {
+      //     $('#nedCareVideoConferenceContainer').fadeIn(gFadeTime);
+      //   });
+      // } else {
+      //   $('#nedCareVideoConferenceContainer').fadeOut(gFadeTime, function () {
+      //     $('#nedCareVideoContainer').fadeIn(gFadeTime);
+      //   });
+      // }
+
+
+      // for (const key of gConferenceParticipantsAudio.keys()) {
+      //   nedCareLog("Key: " + key + ", Screen: " + j);
+      //   if (key !== gMeeting.participantSessionId) {
+      //     // Not the local audio stream
+      //     nedCareLog("Adding audio stream: " + key);
+      //     IdString = "audio" + j;
+      //     var curTrack = gConferenceParticipantsAudio.get(key).track;
+      //     var curMediaStream = new MediaStream([curTrack]);
+      //     document.getElementById(IdString).srcObject = curMediaStream;
+
+      //     playPromise = document.getElementById(IdString).play();
+      //       if (playPromise !== undefined) {
+      //         playPromise.then(_ => {
+      //           nedCareLog('Remote audio track conference started');
+      //       })
+      //       .catch(error => {
+      //         nedCareLog('Remote audio track conference started promise failed');
+      //       });
+      //     }
+      //   }
+      // }
+
+remoteTrackStopped
+
+    // // trackItem.streamId
+    // // document.getElementById(remoteTrackItem.streamId).remove();
+    // if (trackItem.type == "video") {
+    //   var elVideo = document.getElementById(elName);
+    //   var tracks = gRemoteVideoStream.getTracks();
+    //   // Stop local version(s) of the track(s)
+    //   tracks.forEach(function (track) {
+    //     track.stop();
+    //     // track.removeTrack(); // DJC
+    //     nedCareLog("Remote Track Stopped: Stopping track");
+    //   }) // forEach
+    // } // if video
+    // // DJC Why is the null test necessary? Should only be needed if there is no srcObject
+    // if (document.getElementById("primaryVideo").srcObject !==null) {
+    //   document.getElementById("primaryVideo").srcObject = null;
+    // }
+
+    // if (trackItem.type == "audio") {
+    //     if (document.getElementById("remoteAudio").srcObject !==null) {
+    //       document.getElementById("remoteAudio").srcObject = null;
+    //     }
+    // }
+
+MAIN PANEL access
+    // var pos = $("#nedCareMainControlPanelAccess").offset();
+    // // var newPos = { 'top': 0, 'left': 0};
+    
+    // // var bottom = $(window.top).height()
+    // // bottom -= (2 * ($("#nedCareMainControlPanelAccess").height()));
+    // // bottom += 5;
+    // var bottom = pos.top + $("#nedCareMainControlPanelAccess").height() - 5;
+    // // bottom = screen.availHeight - bottom;
+    // nedCareLog("Screen avail height: " + screen.availHeight);
+    // nedCareLog("Window top height: " + $(window.top).height());
+    // // newPos.left = pos.left + $("#nedCareMainControlPanelAccess").width() - $("#nedCareMainControlPanel").width() - 5;
+    // // newPos.top = pos.top + $("#nedCareMainControlPanelAccess").height() - 5;
+    // // newPos.top = pos.top + $("#nedCareMainControlPanelAccess").height() - $("#nedCareMainControlPanel").height() - 5;
+    // // $('#nedCareMainControlPanel').offset(newPos);
+    // $('#nedCareMainControlPanel').css({
+    //   "position" : "sticky",
+    //   "right" : "97vw", 
+    //   "bottom" : bottom + "px"
+    // });
+
+RESIZE SECONDARY Video
+  // Get remote video div height
+  // Get remote video div width
+  // Get viewport height
+  // Get viewport width
+  // If portrait
+  //   Assume remote video div height = 75vw
+  //   If remote video div width > (viewport width)/threshold (50%?)
+  //     Overlay the local video div above the remote video div
+  //   Else
+  //     Place the videos side by side
+  // Else (landscape)
+  //   If remote video div height > (viewport height)/threshold (50%?)
+  //     Overlay the local video div above the remote video div
+  //   Else
+  //     Place the videos side by side
+  // var vTmp = gRemoteVideoStream.getVideoTracks()[0].getSettings();
+  // var vRemoteHeight = vTmp.height;
+  // var vRemoteWidth = vTmp.width;
+  // var vLocalHeight = gLocalVideoStream.getVideoTracks()[0].getSettings().height;
+  // var vLocalWidth = gLocalVideoStream.getVideoTracks()[0].getSettings().width;
+
+USER DEVICE SETTINGS
+
+    // Display debugging information
+    // var vTracks = gRemoteVideoStream.getVideoTracks();
+    // var vTmp = gRemoteVideoStream.getVideoTracks()[0].getSettings();
+    // var vHeight = vTmp.height;
+    // var vWidth = vTmp.width;
+    // nedCareLog("Remote Video Height: " + vHeight);
+    // nedCareLog("Remote Video Width: " + vWidth);
+    // vHeight = gLocalVideoStream.getVideoTracks()[0].getSettings().height;
+    // vWidth = gLocalVideoStream.getVideoTracks()[0].getSettings().width;
+    // nedCareLog("Local Video Height: " + vHeight);
+    // nedCareLog("Local Video Width: " + vWidth);
+

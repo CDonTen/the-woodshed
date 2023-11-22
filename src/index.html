@@ -1,0 +1,2273 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <!-- "versionLong": "NedCare.20231025.21", -->
+        
+        <title>NedCare</title>
+        <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+        <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"> -->
+        <link rel="stylesheet" href="css/bulma.min.css">
+        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="custom.css">
+        <link rel="stylesheet" href="css/loader.css">
+        <link rel="stylesheet" href="css/fa-svg-with-js.css">
+        
+        <style type="text/css">
+            html,body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #fafafa;
+            } 
+        </style>
+        
+        <script src="./config.js"></script>
+        
+        <!-- <script src="https://cdn.metered.ca/sdk/video/1.4.6/sdk.min.js"></script> -->
+        <script src="./js/meteredsdk.min.js"></script>
+
+        <script src="./js/jquery-3.3.1.js"></script>
+        <script src="./js/loglevel.min.js"></script>
+        <script src="./js/NedConnectLib.js"></script>
+        <script src="./js/NedLibUtils.js"></script>
+        <script src="./js/utils.js"></script>
+        <script src="./js/debug.js"></script>
+        <script src="./js/moment.js"></script>
+        <script src="./js/nedCareLog.js"></script>
+        <script src="./js/sounds.js"></script>
+        
+        <!-- <script src="./js/fontawesome.js"></script> -->
+        <!--script src="https://kit.fontawesome.com/ee329580d4.js" crossorigin="anonymous"></script-->
+        <script src="./js/ee329580d4.js"></script>
+        
+        <script src="./pwa.js"></script>
+        <script src="./pwa_features.js"></script>
+        <script src="./pwa_handlers.js"></script>
+        <script src="./join_meeting.js"></script>
+        <script src="./schedule.js"></script>
+        <script src="./device_config.js"></script>
+        
+        <link rel="manifest" href="manifest.json?cb=2" />
+    </head>
+    
+    <body>
+        
+        <script type="module">
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js');
+                });
+                
+                navigator.serviceWorker.addEventListener('controllerchange',
+                function() { window.location.reload();
+                }
+                );
+            }   
+        </script>
+        
+        <div class="loading" style="display:none;">Loading&#8230;</div>
+        
+        <section id="logoHeader" class="mt-4 mb-2" >
+            <div class="columns is-mobile is-centered has-text-centered is-variable p-0 m-0 ">
+                <div class="column is-5-desktop p-0 is-11-mobile">
+                    <div class="columns is-mobile is-multiline is-vcentered">
+                        <div class="column is-5 pt-3">
+                            <img src="img/NedCare-logo-V21x.svg" style="max-width:90%;max-height:60px;" id="nedCareImage">
+                        </div>
+                        <div class="column is-7 pt-3">
+                            <div class="ned-title is-size-6 has-text-weight-semibold">
+                                <span style="white-space: nowrap;">Because connecting</span>
+                                <span style="white-space: nowrap;"> should be simple</span>
+                                <p id="callStatus" class="is-size-6"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="callResidentAnnouncement" class="section" style="display: none;">
+            <div class="columns is-centered">
+                <div class="column has-text-centered is-11">
+                    <div class="has-text-weight-semibold is-size-2-desktop is-size-3-mobile ">
+                        <h1>Calling <span id="residentFirstName"></span> </h1>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="configurePWA" class="section" style="display: none; padding-top: 0rem;">
+            <div class="columns is-centered">
+                <div class="column is-4">
+                    <div class="has-text-weight-semibold has-text-left is-size-3-desktop is-size-4-mobile ">
+                        <h1>Welcome to NedCare</h1>
+                    </div>
+                    <div class="ned-title has-text-left is-size-4-desktop is-size-5-mobile mt-2 mb-2">
+                        <h2>Please fill out the fields to get your NedCare account set up.</h2>   
+                    </div>
+                </div>
+                <div class="column is-5">
+                    <div class="form-wrapper">
+                        <div class="ned-title has-text-weight-semibold has-text-left is-size-4-desktop is-size-5-mobile mb-2">
+                            Account Set Up
+                        </div>
+                        <form onsubmit="return false;">
+                            <div class="columns is-multiline is-vcentered">
+                                <div class="column is-6 pt-3 pb-1">
+                                    <div class="is-fullwidth">
+                                        Your first name:
+                                    </div>
+                                </div>
+                                <div class="column is-6 py-1">
+                                    <input class="input nedcare-input is-fullwidth" placeholder="Ex: Jane or John" id="userFirstName" autocomplete="off">
+                                </div>
+                                <div class="column is-6 py-1">
+                                    <div class="is-fullwidth">
+                                        Your cell number:
+                                    </div>
+                                </div>
+                                <div class="column is-6 py-1">
+                                    <input class="input nedcare-input" placeholder="###-###-####" id="userCellNumber" autocomplete="off" type="tel">
+                                </div>
+                                <div class="column is-6 py-1">
+                                    <div class="is-fullwidth">
+                                        Account number:
+                                    </div>
+                                </div>
+                                <div class="column is-6 py-1">
+                                    <input class="input nedcare-input" placeholder="###-###-####" id="userAccountNumber" autocomplete="off" type="tel">
+                                </div>
+                            </div>
+                            
+                            <div class="column is-7 py-1"></div>
+                            <div class="column is-4 pt-1 pb-4">
+                                <button class="button nedcare-button is-outlined has-text-weight-semibold" id="userConfigure">
+                                    Submit
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="nedCareAuthCode" class="section" style="display: none;">
+            <div class="columns is-centered is-vcentered">
+                <div class="column is-4">
+                    <div class="has-text-weight-semibold has-text-left is-size-3 ">
+                        Account Verification
+                    </div>
+                    <div class="ned-title has-text-left is-size-4 mt-4 mb-4">
+                        Please enter the 5 digit code you received by text
+                    </div>
+                </div>
+                <div class="column is-4">
+                    <div class="form-wrapper">
+                        <div class="ned-title has-text-weight-semibold has-text-left is-size-4 mt-4">
+                            Confirm Account
+                        </div>
+                        <form onsubmit="return false;">
+                            <div class="column">
+                                <div class=" has-text-left">
+                                    NedCare Code:
+                                </div>
+                                <div class="level-item">
+                                    <input class="input nedcare-input mt-1" placeholder="#####" type="tel" id="userNedCareAuthCode" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="mt-5">
+                                <button class="button nedcare-button has-text-weight-semibold" id="userOtpConfirm">
+                                    Confirm
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="columns is-centered is-vcentered mt-6">
+                <div class="column is-4 ned-title has-text-weight-semibold has-text-left is-size-5 mt-5">
+                    <span>Having problems?</span><br>
+                    <span>Request a new NedCare Code.</span>
+                </div>
+                <div class="column has-text-centered is-4 mt-1">
+                    <button class="button nedcare-button has-text-weight-semibold" id="userOtpResend">
+                        Resend
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <section id="dndBanner" class="mt-4" style="display: none;">
+            <div class="columns is-mobile is-centered has-text-centered">
+                <div class="column is-11">
+                    <div id="dndBannerContent" class="has-text-weight-semibold" style="background-color: #ffdd57;"></div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="makeConnection" class="mt-3" style="display: none;">
+            <div class="columns is-mobile is-centered">
+                <div class="column is-11-mobile is-8-desktop is-5-widescreen">
+                    <div class="form-wrapper">
+                        <div class="mt-2" id="connectButtons"></div>
+                        <div class="columns is-mobile is-vcentered mt-0 mx-1" id="userControls">
+                            <div class="column is-8">
+                                <div class="select is-size-5" id="userAccountSelector">
+                                    <select id="userSelectedAccount">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="column is-4">
+                                <button class="button nedcare-button is-outlined has-text-weight-semibold" id="userHangup" style="display: none;">
+                                    Hang Up
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="has-text-centered is-centered" id="doNotDisturbSettings" style="display: none;">
+                        <div class="level mt-3">
+                            <div class="level-item has-text-weight-semibold">
+                                Do Not Disturb Duration:
+                            </div>
+                            <div class="level-item">
+                                <div class="select">
+                                    <select id="userDndDuration">
+                                        <option value="0">Select duration</option>
+                                        <option value="0">Off</option>
+                                        <option value="1">1 hour</option>
+                                        <option value="2">2 hours</option>
+                                        <option value="3">3 hours</option>
+                                        <option value="4">4 hours</option>
+                                        <option value="5">5 hours</option>
+                                        <option value="6">6 hours</option>
+                                        <option value="7">7 hours</option>
+                                        <option value="8">8 hours</option>
+                                        <option value="9">9 hours</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="level-item">
+                                <button class="button nedcare-button is-outlined has-text-weight-semibold mb-4" id="userSubmitDndDuration">
+                                    Submit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="nedCareManageAccounts" class="" style="display: none;">
+            <div class="columns is-mobile is-centered">
+                <div class="column is-11-mobile is-8-desktop is-5-widescreen">
+                    <div class="has-text-weight-semibold has-text-left is-size-3-desktop is-size-4-mobile mt-4">
+                        <h1>Account Management</h1>
+                    </div>
+                    <button class="button nedcare-button is-info has-text-weight-semibold my-3" id="userAddAccount">
+                        Add Account
+                    </button>
+                    <div id="userAccountCards"></div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="nedCareVideoContainer" class="" style="position: relative; display: none">
+            <section id="secondary-remote-audio-mute" class="nedcare-secondary-remote-audio-mute" style="display: none">
+                <span class="icon is-large nedcare-panel-icon">
+                    <i class="fa-2x fa-solid fa-microphone-slash"></i>
+                </span>
+            </section>
+            <section id="nedCarePrimaryVideoContainer" class="has-text-centered">
+                <video id="primaryVideo" muted autoplay playsinline class="nedcare-primary-video"></video>
+                <audio id="remoteAudio" autoplay playsinline style="padding: 0; margin: 0;"></audio>
+            </section>
+            <section id="secondary-video-mute" class="nedcare-secondary-video-mute" style="display: none">
+                <span class="icon is-large nedcare-panel-icon">
+                    <i class="fa-2x fa-solid fa-video-slash"></i>
+                </span>
+            </section>
+            <section id="secondary-audio-mute" class="nedcare-secondary-audio-mute" style="display: none">
+                <span class="icon is-large nedcare-panel-icon">
+                    <i class="fa-2x fa-solid fa-microphone-slash"></i>
+                </span>
+            </section>
+            <section id="nedCareSecondaryVideoContainer" class="has-text-centered">
+                <video id="secondaryVideo" muted autoplay playsinline class="nedcare-secondary-video"></video>
+                <!-- <audio id="localAudio" autoplay playsinline style="padding: 0; margin: 0;"></audio> -->
+            </section>
+            <!-- <div id="localName" style="position:absolute; top:0px; left:10px; color:white; font-weight: 900; z-index: 30;"> -->
+        </section>
+        
+        <section id="nedCareVideoConferenceContainer" class="" style="position: relative; display: none;">
+            <div id="nedCareVideoConferenceColumns" class="columns has-text-centered is-multiline is-variable p-0 m-0">
+                <div id="video0container" class="column is-6 px-0 py-0" style="display: none;">
+                    <video id="video0" muted autoplay playsinline class="nedcare-conference-video"></video>
+                    <audio id="audio0" autoplay playsinline style="padding: 0; margin: 0;"></audio>
+                </div>
+                <div id="video1container" class="column is-6 px-0 py-0" style="display: none;">
+                    <video id="video1" muted autoplay playsinline class="nedcare-conference-video"></video>
+                    <audio id="audio1" autoplay playsinline style="padding: 0; margin: 0;"></audio>
+                </div>
+                <div id="video2container" class="column is-6 px-0 py-0" style="display: none;">
+                    <video id="video2" muted autoplay playsinline class="nedcare-conference-video"></video>
+                    <audio id="audio2" autoplay playsinline style="padding: 0; margin: 0;"></audio>
+                </div>
+                <div id="video3container" class="column is-6 px-0 py-0" style="display: none;">
+                    <video id="video3" muted autoplay playsinline class="nedcare-conference-video"></video>
+                    <audio id="audio3" autoplay playsinline style="padding: 0; margin: 0;"></audio>
+                </div>
+            </div>
+        </section>
+        
+        <section id="nedCareDeviceConfig" class="mt-4 mb-4 has-text-centered" style="display: none;">
+            <div class="is-size-5 has-text-weight-semibold mt-4 mb-2">
+                Audio and Video Configuration<br>
+                Please select the desired camera(s), microphone and speaker then Save your selections.<br>
+            </div>
+            <!--div class="mb-4" id="userDeviceConfigMessage"></div-->
+            <div id="cameraSelectors">
+                <div class="columns is-centered is-multiline is-mobile">
+                    <div class="column is-half">
+                        Front Camera<br>
+                        <video id="setupVideo" muted autoplay playsinline class="nedcare-setup-video mb-4"></video>
+                        <br>
+                        <div class="select" id="cameraIDfrontSelect">
+                            <select id="cameraIDfront">
+                                <option value="None">Select Front Camera</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="column is-half">
+                        Back Camera<br>
+                        <video id="setupVideo2" muted autoplay playsinline class="nedcare-setup-video mb-4"></video>
+                        <br>
+                        <div class="select" id="cameraIDbackSelect">
+                            <select id="cameraIDback">
+                                <option value="None">Select Back Camera</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="audioSelectors">
+                <div class="columns is-centered is-multiline is-mobile">
+                    <div class="column is-half">
+                        <div class="select" id="microphoneIDSelect" style="display:none;">
+                            <select id="microphoneID">
+                                <option value="None">Select Microphone</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="column is-half">
+                        <div class="select" id="speakerIDSelect" style="display:none;">
+                            <select id="speakerID">
+                                <option value="None">Select Speaker</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="columns is-centered is-multiline is-mobile">
+                <div class="column is-half">
+                    <button class="button nedcare-button is-info has-text-weight-semibold" disabled id="userSaveDeviceConfiguration">
+                        Save
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <section id="nedCareMainControlPanelAccess" class="nedcare-local-video-control-panel nedcare-video-control-access">
+            <div>
+                <button class="button nedcare-button nedcare-video-button nedcare-video-control-access is-outlined has-text-weight-semibold userControlPanel" id="nedCareMainControlPanelAccess">
+                    <span class="icon is-large">
+                        <i class="fa-2x fa-solid fa-square-arrow-up-left"></i>
+                    </span>
+                </button>
+            </div>
+        </section>
+        
+        <section id="nedCareMainControlPanel" class="nedcare-local-video-control-panel" style="display: none;">
+            <div class="columns is-mobile is-centered is-variable p-0 m-0 nedcare-control-panel">
+                <div class="column is-3-desktop is-1-mobile"></div>
+                <div class="column is-9-desktop is-11-mobile">
+                    <div class="columns is-mobile is-multiline is-variable p-0 m-0 has-text-weight-semibold">
+                        <div class="column is-12 has-text-centered nedcare-primary-button-panel px-1 is-size-5 py-3" id="userMainHeader" style="background-color: var(--ned-primary-panel-header)">
+                            NedCare Controls
+                        </div>
+                        <div class="column nedClick is-one-quarter has-text-centered nedcare-primary-button-panel px-1" id="userHelp">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-circle-question"></i>
+                            </span>
+                            <div>
+                                Help
+                            </div>
+                        </div>
+                        <div class="column nedClick is-one-quarter has-text-centered nedcare-primary-button-panel px-1" id="userRestartDevice">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-plug"></i>
+                            </span>
+                            <div>
+                                Restart Device
+                            </div>
+                        </div>
+                        <div class="column nedClick is-one-quarter has-text-centered nedcare-primary-button-panel px-1" id="userNedMonitor">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-camera"></i>
+                            </span>
+                            <div>
+                                Monitor
+                            </div>
+                        </div>
+                        <div class="column nedClick is-one-quarter has-text-centered nedcare-primary-button-panel px-1" id="userDeviceSettingsMain">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-gear"></i>
+                            </span>
+                            <div>
+                                Configure
+                            </div>
+                        </div>
+                        <div class="column nedClick is-one-quarter has-text-centered nedcare-primary-button-panel px-1" id="userDoNotDisturb">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="userDoNotDisturb fa-solid fa-lock-open"></i>
+                            </span>
+                            <div>
+                                Do Not Disturb
+                            </div>
+                        </div>
+                        <div class="column nedClick is-one-quarter has-text-centered nedcare-primary-button-panel px-1" id="userManageAccounts">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-file-user"></i>
+                            </span>
+                            <div>
+                                Logout
+                            </div>
+                        </div>
+                        <div class="column nedClick is-one-quarter has-text-centered nedcare-primary-button-panel px-1 userMainControlPanel" id="nedCareEntertainmentTrigger">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-desktop"></i>
+                            </span>
+                            <div>
+                                Entertainment
+                            </div>
+                        </div>
+                        <div class="column nedClick is-one-quarter has-text-centered nedcare-primary-button-panel px-1 userMainControlPanel" id="nedCareMainControlPanelClose">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-square-arrow-down-right"></i>
+                            </span>
+                            <div>
+                                Close
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="nedCareEntertainmentControlPanel" class="nedcare-remote-desktop-control-panel" style="display: none;">
+            <div class="columns is-mobile is-centered is-variable p-0 m-0 nedcare-control-panel">
+                <div class="column is-4-desktop is-2-mobile"></div>
+                <div class="column is-8-desktop is-10-mobile">
+                    <div class="columns is-mobile is-multiline is-variable p-0 m-0 has-text-weight-semibold">
+                        <div class="column is-12 has-text-centered nedcare-secondary-button-panel px-1 is-size-5 py-3 ned-panel-header" id="userMainHeader" style="background-color: var(--ned-secondary-panel-header)">
+                            Entertainment
+                        </div>
+                        <div class="column nedClick is-one-quarter has-text-centered nedcare-secondary-button-panel px-1 nedcare-entertainment" id="https://primevideo.com">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-brands fa-amazon"></i>
+                            </span>
+                            <div>
+                                Prime Video
+                            </div>
+                        </div>
+                        <div class="column nedClick is-one-quarter has-text-centered nedcare-secondary-button-panel px-1 nedcare-entertainment" id="https://disneyplus.ca">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <img src="img/DisneyPlusLogo.svg" style="max-width:90%;max-height:20px;" id="nedCareImage">
+                            </span>
+                            <div>
+                                Disney Plus
+                            </div>
+                        </div>
+                        <div class="column nedClick is-one-quarter has-text-centered nedcare-secondary-button-panel px-1 nedcare-entertainment" id="https://netflix.ca">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <img src="img/Netflix2015Logo.svg" style="max-width:90%;max-height:20px;" id="nedCareImage">
+                            </span>
+                            <div>
+                                Netflix
+                            </div>
+                        </div>
+                        <div class="column nedClick is-one-quarter has-text-centered nedcare-secondary-button-panel px-1" id="nedCareRemoteDesktop">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-desktop"></i>
+                            </span>
+                            <div>
+                                Desktop
+                            </div>
+                        </div>
+                        <div class="column nedClick is-one-quarter has-text-centered nedcare-secondary-button-panel px-1" id="nedCareBackToNedCare">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <img src="img/NedCare-logo-V1-1.svg" style="max-width:90%;max-height:20px;">
+                            </span>
+                            <div>
+                                Back to NedCare
+                            </div>
+                        </div>
+                        <div class="column nedClick is-one-quarter has-text-centered nedcare-secondary-button-panel px-1 nedcare-entertainment" id="https://tubitv.com/home">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <svg preserveAspectRatio="xMidYMid meet" viewBox="0 0 105 44" role="img" style="fill: red;"><title>Tubi logo</title><path d="M55.5 12h-7v16a8 8 0 11-16 0V13a1 1 0 00-1-1h-7v16a16 16 0 0032 0V13a1 1 0 00-1-1zM24.1 40.96l-3.03-5.21a1 1 0 00-1.27-.42A8.05 8.05 0 018.54 28v-7a1 1 0 011-1H19.6a1 1 0 001-1v-6a1 1 0 00-1-1H9.54a1 1 0 01-1-1V1a1 1 0 00-1-1H.5v28c0 8.84 7.2 16 16.08 16 2.54 0 4.95-.59 7.1-1.64a1 1 0 00.42-1.4zM100.5 0a4 4 0 100 8 4 4 0 000-8zm3 12h-7v31a1 1 0 001 1h6a1 1 0 001-1V13a1 1 0 00-1-1zm-27 24a8 8 0 110-16 8 8 0 010 16zm0-24c-2.35 0-4.58.5-6.59 1.42a1 1 0 01-1.41-.92V1a1 1 0 00-1-1h-7v28a16 16 0 1016-16z" fill="currentcolor"></path></svg>
+                            </span>
+                            <div>
+                                TubiTV
+                            </div>
+                        </div>
+                        <div class="column nedClick is-one-quarter has-text-centered nedcare-secondary-button-panel px-1 userMainControlPanel nedcare-entertainment" id="https://telustvplus.com">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <img src="img/telustvplus.svg" style="max-width:90%;max-height:20px;">
+                            </span>
+                            <div>
+                                Telus TV+
+                            </div>
+                        </div>
+                        <div class="column nedClick is-one-quarter has-text-centered nedcare-secondary-button-panel px-1 userMainControlPanel" id="nedCareEntertainmentControlPanelClose">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-square-arrow-down-right"></i>
+                            </span>
+                            <div>
+                                Close
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="nedCareLocalControlPanelAccess" class="nedcare-local-video-control-panel nedcare-video-control-access" style="display: none;">
+            <div>
+                <button class="button nedcare-button nedcare-video-button nedcare-video-control-access is-outlined has-text-weight-semibold userControlPanel" id="nedCareLocalControlPanelAccess">
+                    <span class="icon is-large">
+                        <i class="fa-2x fa-solid fa-square-arrow-up-left"></i>
+                    </span>
+                </button>
+            </div>
+        </section>
+        
+        <section id="nedCareLocalControlPanel" class="nedcare-local-video-control-panel" style="display: none;">
+            <div class="columns is-mobile is-centered is-variable p-0 m-0 nedcare-control-panel">
+                <div class="column is-5-desktop is-1-mobile"></div>
+                <div class="column is-7-desktop is-11-mobile">
+                    <div class="columns is-mobile is-multiline is-variable p-0 m-0 has-text-weight-semibold">
+                        <div class="column is-12 has-text-centered nedcare-primary-button-panel px-1 is-size-5 py-3 ned-panel-header" id="userLocalHeader" style="background-color: var(--ned-primary-panel-header)">
+                            Your Experience
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1" id="userMeetingLeave" style="background-color: rgb(112, 0, 0);">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-person-running-fast"></i>
+                            </span>
+                            <div>
+                                Exit Call
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1 nedcare-video" id="userVideoToggle">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-video userVideoToggle"></i>
+                            </span>
+                            <div>
+                                Video Mute
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1 nedcare-video" id="userPrimaryContrastDown">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-duotone fa-circle"></i>
+                            </span>
+                            <div>
+                                Lower Contrast
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1 nedcare-video" id="userPrimaryContrastUp">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-circle-half-stroke"></i>
+                            </span>
+                            <div>
+                                Higher Contrast
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1 nedcare-video" id="userPrimaryDimmer">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-brightness-low"></i>
+                            </span>
+                            <div>
+                                Dimmer
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1 nedcare-video" id="userPrimaryBrighter">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-brightness"></i>
+                            </span>
+                            <div>
+                                Brighter
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1" id="userScreenShare">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-screencast"></i>
+                            </span>
+                            <div>
+                                Share Screen
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1" id="userSwitchCameras">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-retweet"></i>
+                            </span>
+                            <div>
+                                Swap Camera
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1" id="userSwapDisplays">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-arrow-up-arrow-down"></i>
+                            </span>
+                            <div>
+                                Swap Display
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1 nedcare-audio" id="userMicrophoneMuteToggle">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-microphone userMicrophoneMuteToggle"></i>
+                            </span>
+                            <div>
+                                Audio Mute
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1" id="userDeviceSettings">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-gear"></i>
+                            </span>
+                            <div>
+                                Configure
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1 userControlPanel" id="userControlPanelClose">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-square-arrow-down-right"></i>
+                            </span>
+                            <div>
+                                Close
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="nedCareRemoteControlPanelAccess" class="nedcare-remote-video-control-panel nedcare-video-control-access" style="display: none;">
+            <div>
+                <button class="button nedcare-button nedcare-video-button is-outlined has-text-weight-semibold userRemoteControlPanel" id="userRemoteControlPanel">
+                    <span class="icon is-large">
+                        <i class="fa-2x fa-solid fa-square-arrow-up-right"></i>
+                    </span>
+                </button>
+            </div>
+        </section>
+        
+        <section id="nedCareRemoteControlPanel" class="nedcare-remote-video-control-panel" style="display: none;">
+            <div class="columns is-mobile is-centered is-variable p-0 m-0 nedcare-control-panel">
+                <div class="column is-6-desktop is-11-mobile">
+                    <div class="columns is-mobile is-multiline is-variable p-0 m-0 has-text-weight-semibold">
+                        <div class="column is-12 has-text-centered nedcare-primary-button-panel px-1 is-size-5 py-3 ned-panel-header" id="userRemoteHeader" style="background-color: var(--ned-primary-panel-header)">
+                            Resident Experience
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1 userResidentControl nedcare-video" id="userRemoteVideoToggle">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-video userRemoteVideoToggle"></i>
+                            </span>
+                            <div>
+                                Video Mute
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1 userResidentControl nedcare-video" id="userRemotePrimaryDimmer">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-brightness-low"></i>
+                            </span>
+                            <div>
+                                Dimmer
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1 userResidentControl nedcare-video" id="userRemotePrimaryBrighter">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-brightness"></i>
+                            </span>
+                            <div>
+                                Brighter
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1 userResidentControl nedcare-video" id="userRemoteContrastDown">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-duotone fa-circle"></i>
+                            </span>
+                            <div>
+                                Lower Contrast
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1 userResidentControl nedcare-video" id="userRemoteContrastUp">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-circle-half-stroke"></i>
+                            </span>
+                            <div>
+                                Higher Contrast
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1 userResidentControl" id="userRemoteRestoreDefaults">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-rotate-left"></i>
+                            </span>
+                            <div>
+                                Reset Controls
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1 userRemoteControlPanel" id="userRemoteControlPanelClose">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-square-arrow-down-left"></i>
+                            </span>
+                            <div>
+                                Close
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1" id="unused1">
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1" id="unused2">
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1 userResidentControl nedcare-audio" id="userRemoteMicrophoneMuteToggle">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-microphone userRemoteMicrophoneMuteToggle"></i>
+                            </span>
+                            <div>
+                                Audio Mute
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1 userResidentControl nedcare-audio" id="userRemoteAudioDown">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-volume-low"></i>
+                            </span>
+                            <div>
+                                Audio Down
+                            </div>
+                        </div>
+                        <div class="column nedClick is-2 has-text-centered nedcare-primary-button-panel px-1 userResidentControl nedcare-audio" id="userRemoteAudioUp">
+                            <span class="icon is-large nedcare-panel-icon">
+                                <i class="fa-2x fa-solid fa-volume-high"></i>
+                            </span>
+                            <div>
+                                Audio Up
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-6-desktop is-1-mobile"></div>
+            </div>
+        </section>
+        
+        <section id="testIframe" class="section mt-4" style="display: none;">
+            <div class="columns has-text-centered">
+                <div class="column is-12">
+                    <iframe id="iframeTest" src="" title="Test" width="640" height="360" style="border: 1px black; border-style: solid;"></iframe>
+                </div>
+            </div>
+        </section>
+        
+        <section id="debugMessagesContainer" class="mb-6" style="display: none; margin-top: 24rem;" >
+            <!-- <section id="debugMessagesContainer" class="mb-6" style="display: none; margin-top: 24rem;" > -->
+            <div class="columns is-mobile is-centered">
+                <div class="column is-9-desktop is-11-mobile">
+                    <div>
+                        <button class="button nedcare-button nedcare-video-button is-outlined has-text-weight-semibold mt-4" id="userClearDebugLog">
+                            Clear Debug Log
+                        </button>
+                    </div>
+                    <div>
+                        <button class="button nedcare-button nedcare-video-button is-outlined has-text-weight-semibold mt-4" id="userPrintDevices">
+                            Print Devices
+                        </button>
+                    </div>
+                    <div>
+                        <button class="button nedcare-button nedcare-video-button is-outlined has-text-weight-semibold mt-4" id="userClearLocalStorage">
+                            Clear Local Storage
+                        </button>
+                    </div>
+                    <span id="debugMessages" class="is-size-6" style="overflow-wrap: break-word;"></span>
+                </div>
+            </div>
+        </section>
+        
+        <section id="nedCareControls" class="mb-6" style="display: none; margin-top: 24rem;" >
+            <div class="columns is-mobile is-centered has-text-centered">
+                <div class="column is-5-desktop is-11-mobile">
+                    <div id="accountNumber"></div>
+                    <div id="cellNumber"></div>
+                    <div id="userID"></div>
+                    <div id="URLaddress"></div>
+                    <div id="versionNumber"></div>
+                    <div class="mt-4">
+                        <div>
+                            <button class="button nedcare-button is-outlined has-text-weight-semibold" id="userSimulateButtonClick">
+                                Click!
+                            </button>
+                            <button class="button nedcare-button is-outlined has-text-weight-semibold" id="userDev">
+                                Toggle Dev Tools
+                            </button>
+                        </div>
+                        <div>
+                            <button class="button nedcare-button is-outlined has-text-weight-semibold" id="userOpenHomeAssistant">
+                                Home Assistant
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="nedCareTelevisionControls" class="section mt-6" style="display: none;">
+            <div class="columns is-centered is-vcentered">
+                <div class="column is-4">
+                    <div class="has-text-weight-semibold has-text-left is-size-3 ">
+                        Television
+                    </div>
+                    <div class="ned-title has-text-left is-size-4 mt-4 mb-4">
+                        Basic television operations<br>Remote control
+                    </div>
+                    <div class="has-text-weight-semibold has-text-left is-size-6 mt-4">
+                        NOT YET IMPLEMENTED
+                    </div>
+                </div>
+                <div class="column is-4">
+                    <div class="form-wrapper">
+                        <div class="level is-mobile">
+                            <div class="level-left">
+                                <div class="level-item">
+                                    <div class="ned-title has-text-weight-semibold has-text-left is-size-4 mt-4">
+                                        TV Controls
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="level-right">
+                                <div class="level-item">
+                                    <button class="button nedcare-button has-text-weight-semibold has-text-centered mt-5" id="userTVSettings">
+                                        Settings
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="" id="userConfigureTV" style="display: none;">
+                            <div class="level is-mobile mt-5">
+                                <div class="level-left">
+                                    <div class="level-item">
+                                        TV Brand:
+                                    </div>
+                                    <div class="level-item">
+                                        <div class="select">
+                                            <select id="userTVBrand">
+                                                <option value="None">Select brand</option>
+                                                <option value="Haier">Haier</option>
+                                                <option value="HiSense">HiSense</option>
+                                                <option value="Hitachi">Hitachi</option>
+                                                <option value="Insignia">Insignia</option>
+                                                <option value="LG">LG</option>
+                                                <option value="Optimus">Optimus</option>
+                                                <option value="Philips">Philips</option>
+                                                <option value="RCA">RCA</option>
+                                                <option value="Samsung">Samsung</option>
+                                                <option value="Sanyo">Sanyo</option>
+                                                <option value="Sharp">Sharp</option>
+                                                <option value="Sony">Sony</option>
+                                                <option value="Sylvania">Sylvania</option>
+                                                <option value="Toshiba">Toshiba</option>
+                                                <option value="Zenith">Zenith</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- <div class="level is-mobile mt-5">
+                                <div class="level-left">
+                                <div class="level-item">
+                                TV Model:
+                                </div>
+                                <div class="level-item">
+                                <input class="input nedcare-input" placeholder="Model Name" id="userTVmodel" autocomplete="off">
+                                </div>
+                                </div>
+                            </div> -->
+                            <div class="level is-mobile mt-5">
+                                <div class="level-left">
+                                    <div class="level-item">
+                                        Volume Step:
+                                    </div>
+                                    <div class="level-item">
+                                        <div class="control">
+                                            <input type="radio" name="userVolumeStep" id="userTVSmallVolumeStep" value="tvVolumeSmallStep" checked="true">
+                                            5%
+                                            <input type="radio" name="userVolumeStep" id="userTVLargeVolumeStep" value="tvVolumeLargeStep">
+                                            10%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- <div class="level is-mobile mt-5">
+                                <div class="level-left">
+                                <div class="level-item">
+                                Remote Code:
+                                </div>
+                                <div class="level-item">
+                                <input class="input nedcare-input" placeholder="####" id="userRemoteCode" autocomplete="off" type="tel">
+                                </div>
+                                </div>
+                            </div> -->
+                            <div class="mt-5" >
+                                <button class="button nedcare-button is-outlined has-text-weight-semibold" id="userSubmitTVsettings">
+                                    Submit
+                                </button>
+                            </div>
+                        </div>
+                        <div class="column" id="userTVCommand">
+                            <div class="level is-mobile mt-5">
+                                <div class="level-left">
+                                    <div class="level-item">
+                                        Power:
+                                    </div>
+                                    <div class="level-item">
+                                        <div class="control">
+                                            <input type="radio" name="userTVPower" id="userTVPowerOn" value="TVOn">
+                                            On
+                                            <input type="radio" name="userTVPower" id="userTVPowerOff" value="TVOff" checked="true">
+                                            Off
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="level is-mobile mt-5">
+                                <div class="level-left">
+                                    <div class="level-item">
+                                        Volume (%)
+                                    </div>
+                                </div>
+                                <div class="level-item">
+                                    <input class="input nedcare-input mt-1" placeholder="0=min, 100=max" id="userTelevisionVolume" autocomplete="off" type="tel">
+                                </div>
+                            </div>
+                            <div class="level is-mobile mt-5">
+                                <div class="level-left">
+                                    <div class="level-item">
+                                        Channel:
+                                    </div>
+                                </div>
+                                <div class="level-item">
+                                    <input class="input nedcare-input" placeholder="###" id="userTelevisionChannel" autocomplete="off" type="tel">
+                                </div>
+                            </div>
+                            <div class="has-text-centered">
+                                <div class="level is-mobile mt-5">
+                                    <div class="level-left">
+                                        <div class="level-item">
+                                            <button class="button nedcare-button has-text-weight-semibold has-text-centered mt-5" id="userTVguide">
+                                                TV Guide
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="level-right">
+                                        <div class="level-item">
+                                            <button class="button nedcare-button has-text-weight-semibold has-text-centered mt-5" id="userCommandTV">
+                                                Send
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="makeConnectionDev" class="mt-4 mb-6" style="display: none;">
+            <div class="columns is-mobile is-centered">
+                <div class="column is-11-mobile is-6-desktop">
+                    <div class="form-wrapper">
+                        <div id="contactButtons"></div>
+                        <div id="textMessageButtons"></div>
+                        <div id="sayButtons"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="nedCareCallSchedule" class="section mt-6" style="display: none;">
+            <div class="columns is-centered is-vcentered">
+                <div class="column is-4">
+                    <div class="has-text-weight-semibold has-text-left is-size-3 ">
+                        Call Schedule
+                    </div>
+                    <div class="ned-title has-text-left is-size-4 mt-4 mb-4">
+                        Configure time and prompts
+                    </div>
+                    <div class="has-text-weight-semibold has-text-left is-size-6 mt-4">
+                        NOT YET IMPLEMENTED
+                    </div>
+                    <div class="is-size-6">
+                        Confirmation Schedule prompts the resident to confirm their outgoing call, using the prompt message, before allowing the call to proceed.
+                    </div>
+                    <div class="is-size-6 mt-2">
+                        Blocking Schedule informs the resident, using the blocking message, that they cannot make their outgoing call at this time.
+                    </div>
+                </div>
+                <div class="column is-4">
+                    <div class="form-wrapper">
+                        <div class="ned-title has-text-weight-semibold has-text-left is-size-4 mt-4">
+                            Confirmation Schedule
+                        </div>
+                        <div class="level is-mobile">
+                            <div class="level-left">
+                                <div class="level-item">
+                                    Start Time:
+                                </div>
+                                <div class="level-item">
+                                    <input class="input nedcare-input mt-1" placeholder="##:##" id="userConfirmStartTime" autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="level is-mobile">
+                            <div class="level-left">
+                                <div class="level-item">
+                                    End Time:
+                                </div>
+                                <div class="level-item">
+                                    <input class="input nedcare-input mt-1" placeholder="##:##" id="userConfirmEndTime" autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            Message:
+                        </div>
+                        <div>
+                            <input class="input nedcare-input mt-1" placeholder="Message" id="userConfirmScheduleMessage" autocomplete="off">
+                        </div>
+                        <!-- Frequency -->
+                        <div>
+                            <div class="mt-2 mb-2">
+                                Frequency
+                            </div>
+                            <div class="columns is-mobile is-variable is-1 userEventDays">
+                                <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqConfirmSu" class="userEventData">Su</label></div>
+                                <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqConfirmMo" class="userEventData">M</label></div>
+                                <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqConfirmTu" class="userEventData">Tu</label></div>
+                                <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqConfirmWe" class="userEventData">W</label></div>
+                                <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqConfirmTh" class="userEventData">T</label></div>
+                                <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqConfirmFr" class="userEventData">F</label></div>
+                                <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqConfirmSa" class="userEventData">S</label></div>
+                            </div>
+                        </div>
+                        
+                        <div class="ned-title has-text-weight-semibold has-text-left is-size-4 mt-4">
+                            Blocking Schedule
+                        </div>
+                        <div class="level is-mobile">
+                            <div class="level-left">
+                                <div class="level-item">
+                                    Start Time:
+                                </div>
+                                <div class="level-item">
+                                    <input class="input nedcare-input mt-1" placeholder="##:##" id="userBlockStartTime" autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="level is-mobile">
+                            <div class="level-left">
+                                <div class="level-item">
+                                    End Time:
+                                </div>
+                                <div class="level-item">
+                                    <input class="input nedcare-input mt-1" placeholder="##:##" id="userBlockEndTime" autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            Message:
+                        </div>
+                        <div>
+                            <input class="input nedcare-input mt-1" placeholder="Message" id="userBlockScheduleMessage" autocomplete="off">
+                        </div>
+                        <!-- Frequency -->
+                        <div>
+                            <div class="mt-2 mb-2">
+                                Frequency
+                            </div>
+                            <div class="columns is-mobile is-variable is-1 userEventDays">
+                                <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqBlockSu" class="userEventData">Su</label></div>
+                                <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqBlockMo" class="userEventData">M</label></div>
+                                <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqBlockTu" class="userEventData">Tu</label></div>
+                                <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqBlockWe" class="userEventData">W</label></div>
+                                <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqBlockTh" class="userEventData">T</label></div>
+                                <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqBlockFr" class="userEventData">F</label></div>
+                                <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqBlockSa" class="userEventData">S</label></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-5">
+                            <button class="button nedcare-button has-text-weight-semibold" id="userScheduleSave">
+                                Save Schedule
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="nedCareReminderSchedule" class="section mt-6" style="display: none;">
+            <div class="columns is-centered is-vcentered">
+                <!-- Intro -->
+                <div class="column is-4">
+                    <div class="has-text-weight-semibold has-text-left is-size-3 ">
+                        Reminder Schedule
+                    </div>
+                    <div class="ned-title has-text-left is-size-4 mt-4 mb-4">
+                        Configure reminders, reminder times 
+                    </div>
+                    <div class="has-text-weight-semibold has-text-left is-size-6 mt-4">
+                        NOT YET IMPLEMENTED
+                    </div>
+                    <div class="is-size-6">
+                        The Resident will hear the messages at the scheduled times. Intended to assist the Resident with remembering specific tasks, visits, etc.
+                    </div>
+                </div>
+                <!-- Events -->
+                <div class="column is-4">
+                    <div class="form-wrapper">
+                        <div class="ned-title has-text-weight-semibold has-text-left is-size-4 mt-4">
+                            Reminder Schedule
+                        </div>
+                        <!-- Schedule Footer -->
+                        <div class="level is-mobile">
+                            <div class="level-left">
+                                <div class="level-item">
+                                    <div class="mt-5">
+                                        <button class="button nedcare-button has-text-weight-semibold" id="userReminderScheduleAdd">
+                                            Add
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="level-item">
+                                <div class="mt-5">
+                                    <button class="button nedcare-button has-text-weight-semibold" id="userReminderScheduleLoad">
+                                        Load
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="level-right">
+                                <div class="level-item">
+                                    <div class="mt-5">
+                                        <button class="button nedcare-button has-text-weight-semibold" id="userReminderScheduleSave">
+                                            Save
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="userReminderSchedule"></div>
+                        
+                        <!-- Individual Events -->
+                        <div>
+                            <!-- ***** USER EVENT0 ***** -->
+                            <div class="userEvent" id="userEvent0" style="display: none;">
+                                <!-- Header -->
+                                <div class="level is-mobile mt-4">
+                                    <div class="level-left">
+                                        <div class="level-item">
+                                            <div class="ned-title has-text-weight-semibold has-text-left is-size-4 mt-4 userEventEntry">
+                                                Event
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="level-right">
+                                        <div class="level-item">
+                                            <button class="button nedcare-button has-text-weight-semibold userDeleteEvent" id="userEventDelete0">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Body -->
+                                <div class="" id="userEventEntry0">
+                                    <!-- Time -->
+                                    <div class="level is-mobile">
+                                        <div class="level-left">
+                                            <div class="mt-4 mr-2">
+                                                Time:
+                                            </div>
+                                            <div class="level is-mobile mt-4">
+                                                <div class="level-left">
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventHour0" class="userEventData">
+                                                                <option value="None">Hour</option>
+                                                                <option value="1">1</option>
+                                                                <option value="2">2</option>
+                                                                <option value="3">3</option>
+                                                                <option value="4">4</option>
+                                                                <option value="5">5</option>
+                                                                <option value="6">6</option>
+                                                                <option value="7">7</option>
+                                                                <option value="8">8</option>
+                                                                <option value="9">9</option>
+                                                                <option value="10">10</option>
+                                                                <option value="11">11</option>
+                                                                <option value="12">12</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventMinute0" class="userEventData">
+                                                                <option value="None">Min</option>
+                                                                <option value="0">00</option>
+                                                                <option value="5">05</option>
+                                                                <option value="10">10</option>
+                                                                <option value="15">15</option>
+                                                                <option value="20">20</option>
+                                                                <option value="25">25</option>
+                                                                <option value="30">30</option>
+                                                                <option value="35">35</option>
+                                                                <option value="40">40</option>
+                                                                <option value="45">45</option>
+                                                                <option value="50">50</option>
+                                                                <option value="55">55</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="control">
+                                                            <label class="radio">
+                                                            <input type="radio" name="userMornAft0" id="userAM0" value="AM" checked="true" class="userEventData">AM</label>
+                                                            <label class="radio"><input type="radio" name="userMornAft0" id="userPM0" value="PM" class="userEventData">PM</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Message -->
+                                    <div>
+                                        <div class="mt-2">
+                                            Message:
+                                        </div>
+                                        <div>
+                                            <input class="input nedcare-input mt-1 userMessageEvent userEventData" placeholder="Message" id="userEventMessage0" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <!-- Frequency -->
+                                    <div>
+                                        <div class="mt-2 mb-2">
+                                            Frequency
+                                        </div>
+                                        <div class="columns is-mobile is-variable is-1 userEventDays">
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSu0" class="userEventData">Su</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqMo0" class="userEventData">M</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTu0" class="userEventData">Tu</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqWe0" class="userEventData">W</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTh0" class="userEventData">T</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqFr0" class="userEventData">F</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSa0" class="userEventData">S</label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- ***** USER EVENT1 ***** -->
+                            <div class="userEvent" id="userEvent1" style="display: none;">
+                                <!-- Header -->
+                                <div class="level is-mobile mt-4">
+                                    <div class="level-left">
+                                        <div class="level-item">
+                                            <div class="ned-title has-text-weight-semibold has-text-left is-size-4 mt-4 userEventEntry">
+                                                Event
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="level-right">
+                                        <div class="level-item">
+                                            <button class="button nedcare-button has-text-weight-semibold userDeleteEvent" id="userEventDelete1">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Body -->
+                                <div class="" id="userEventEntry1">
+                                    <!-- Time -->
+                                    <div class="level is-mobile">
+                                        <div class="level-left">
+                                            <div class="mt-4 mr-2">
+                                                Time:
+                                            </div>
+                                            <div class="level is-mobile mt-4">
+                                                <div class="level-left">
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventHour1" class="userEventData">
+                                                                <option value="None">Hour</option>
+                                                                <option value="1">1</option>
+                                                                <option value="2">2</option>
+                                                                <option value="3">3</option>
+                                                                <option value="4">4</option>
+                                                                <option value="5">5</option>
+                                                                <option value="6">6</option>
+                                                                <option value="7">7</option>
+                                                                <option value="8">8</option>
+                                                                <option value="9">9</option>
+                                                                <option value="10">10</option>
+                                                                <option value="11">11</option>
+                                                                <option value="12">12</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventMinute1" class="userEventData">
+                                                                <option value="None">Min</option>
+                                                                <option value="0">00</option>
+                                                                <option value="5">05</option>
+                                                                <option value="10">10</option>
+                                                                <option value="15">15</option>
+                                                                <option value="20">20</option>
+                                                                <option value="25">25</option>
+                                                                <option value="30">30</option>
+                                                                <option value="35">35</option>
+                                                                <option value="40">40</option>
+                                                                <option value="45">45</option>
+                                                                <option value="50">50</option>
+                                                                <option value="55">55</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="control">
+                                                            <label class="radio">
+                                                            <input type="radio" name="userMornAft1" id="userAM1" value="AM" checked="true" class="userEventData">AM</label>
+                                                            <label class="radio"><input type="radio" name="userMornAft1" id="userPM1" value="PM" class="userEventData">PM</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Message -->
+                                    <div>
+                                        <div class="mt-2">
+                                            Message:
+                                        </div>
+                                        <div>
+                                            <input class="input nedcare-input mt-1 userMessageEvent userEventData" placeholder="Message" id="userEventMessage1" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <!-- Frequency -->
+                                    <div>
+                                        <div class="mt-2 mb-2">
+                                            Frequency
+                                        </div>
+                                        <div class="columns is-mobile is-variable is-1 userEventDays">
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSu1" class="userEventData">Su</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqMo1" class="userEventData">M</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTu1" class="userEventData">Tu</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqWe1" class="userEventData">W</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTh1" class="userEventData">T</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqFr1" class="userEventData">F</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSa1" class="userEventData">S</label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- ***** USER EVENT2 ***** -->
+                            <div class="userEvent" id="userEvent2" style="display: none;">
+                                <!-- Header -->
+                                <div class="level is-mobile mt-4">
+                                    <div class="level-left">
+                                        <div class="level-item">
+                                            <div class="ned-title has-text-weight-semibold has-text-left is-size-4 mt-4 userEventEntry">
+                                                Event
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="level-right">
+                                        <div class="level-item">
+                                            <button class="button nedcare-button has-text-weight-semibold userDeleteEvent" id="userEventDelete2">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Body -->
+                                <div class="" id="userEventEntry2">
+                                    <!-- Time -->
+                                    <div class="level is-mobile">
+                                        <div class="level-left">
+                                            <div class="mt-4 mr-2">
+                                                Time:
+                                            </div>
+                                            <div class="level is-mobile mt-4">
+                                                <div class="level-left">
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventHour2" class="userEventData">
+                                                                <option value="None">Hour</option>
+                                                                <option value="1">1</option>
+                                                                <option value="2">2</option>
+                                                                <option value="3">3</option>
+                                                                <option value="4">4</option>
+                                                                <option value="5">5</option>
+                                                                <option value="6">6</option>
+                                                                <option value="7">7</option>
+                                                                <option value="8">8</option>
+                                                                <option value="9">9</option>
+                                                                <option value="10">10</option>
+                                                                <option value="11">11</option>
+                                                                <option value="12">12</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventMinute2" class="userEventData">
+                                                                <option value="None">Min</option>
+                                                                <option value="0">00</option>
+                                                                <option value="5">05</option>
+                                                                <option value="10">10</option>
+                                                                <option value="15">15</option>
+                                                                <option value="20">20</option>
+                                                                <option value="25">25</option>
+                                                                <option value="30">30</option>
+                                                                <option value="35">35</option>
+                                                                <option value="40">40</option>
+                                                                <option value="45">45</option>
+                                                                <option value="50">50</option>
+                                                                <option value="55">55</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="control">
+                                                            <label class="radio">
+                                                            <input type="radio" name="userMornAft2" id="userAM2" value="AM" checked="true" class="userEventData">AM</label>
+                                                            <label class="radio"><input type="radio" name="userMornAft2" id="userPM2" value="PM" class="userEventData">PM</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Message -->
+                                    <div>
+                                        <div class="mt-2">
+                                            Message:
+                                        </div>
+                                        <div>
+                                            <input class="input nedcare-input mt-1 userMessageEvent userEventData" placeholder="Message" id="userEventMessage2" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <!-- Frequency -->
+                                    <div>
+                                        <div class="mt-2 mb-2">
+                                            Frequency
+                                        </div>
+                                        <div class="columns is-mobile is-variable is-1 userEventDays">
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSu2" class="userEventData">Su</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqMo2" class="userEventData">M</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTu2" class="userEventData">Tu</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqWe2" class="userEventData">W</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTh2" class="userEventData">T</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqFr2" class="userEventData">F</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSa2" class="userEventData">S</label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- ***** USER EVENT3 ***** -->
+                            <div class="userEvent" id="userEvent3" style="display: none;">
+                                <!-- Header -->
+                                <div class="level is-mobile mt-4">
+                                    <div class="level-left">
+                                        <div class="level-item">
+                                            <div class="ned-title has-text-weight-semibold has-text-left is-size-4 mt-4 userEventEntry">
+                                                Event
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="level-right">
+                                        <div class="level-item">
+                                            <button class="button nedcare-button has-text-weight-semibold userDeleteEvent" id="userEventDelete3">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Body -->
+                                <div class="" id="userEventEntry3">
+                                    <!-- Time -->
+                                    <div class="level is-mobile">
+                                        <div class="level-left">
+                                            <div class="mt-4 mr-2">
+                                                Time:
+                                            </div>
+                                            <div class="level is-mobile mt-4">
+                                                <div class="level-left">
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventHour3" class="userEventData">
+                                                                <option value="None">Hour</option>
+                                                                <option value="1">1</option>
+                                                                <option value="2">2</option>
+                                                                <option value="3">3</option>
+                                                                <option value="4">4</option>
+                                                                <option value="5">5</option>
+                                                                <option value="6">6</option>
+                                                                <option value="7">7</option>
+                                                                <option value="8">8</option>
+                                                                <option value="9">9</option>
+                                                                <option value="10">10</option>
+                                                                <option value="11">11</option>
+                                                                <option value="12">12</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventMinute3" class="userEventData">
+                                                                <option value="None">Min</option>
+                                                                <option value="0">00</option>
+                                                                <option value="5">05</option>
+                                                                <option value="10">10</option>
+                                                                <option value="15">15</option>
+                                                                <option value="20">20</option>
+                                                                <option value="25">25</option>
+                                                                <option value="30">30</option>
+                                                                <option value="35">35</option>
+                                                                <option value="40">40</option>
+                                                                <option value="45">45</option>
+                                                                <option value="50">50</option>
+                                                                <option value="55">55</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="control">
+                                                            <label class="radio">
+                                                            <input type="radio" name="userMornAft3" id="userAM3" value="AM" checked="true" class="userEventData">AM</label>
+                                                            <label class="radio"><input type="radio" name="userMornAft3" id="userPM3" value="PM" class="userEventData">PM</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Message -->
+                                    <div>
+                                        <div class="mt-2">
+                                            Message:
+                                        </div>
+                                        <div>
+                                            <input class="input nedcare-input mt-1 userMessageEvent userEventData" placeholder="Message" id="userEventMessage3" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <!-- Frequency -->
+                                    <div>
+                                        <div class="mt-2 mb-2">
+                                            Frequency
+                                        </div>
+                                        <div class="columns is-mobile is-variable is-1 userEventDays">
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSu3" class="userEventData">Su</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqMo3" class="userEventData">M</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTu3" class="userEventData">Tu</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqWe3" class="userEventData">W</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTh3" class="userEventData">T</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqFr3" class="userEventData">F</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSa3" class="userEventData">S</label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- ***** USER EVENT4 ***** -->
+                            <div class="userEvent" id="userEvent4" style="display: none;">
+                                <!-- Header -->
+                                <div class="level is-mobile mt-4">
+                                    <div class="level-left">
+                                        <div class="level-item">
+                                            <div class="ned-title has-text-weight-semibold has-text-left is-size-4 mt-4 userEventEntry">
+                                                Event
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="level-right">
+                                        <div class="level-item">
+                                            <button class="button nedcare-button has-text-weight-semibold userDeleteEvent" id="userEventDelete4">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Body -->
+                                <div class="" id="userEventEntry4">
+                                    <!-- Time -->
+                                    <div class="level is-mobile">
+                                        <div class="level-left">
+                                            <div class="mt-4 mr-2">
+                                                Time:
+                                            </div>
+                                            <div class="level is-mobile mt-4">
+                                                <div class="level-left">
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventHour4" class="userEventData">
+                                                                <option value="None">Hour</option>
+                                                                <option value="1">1</option>
+                                                                <option value="2">2</option>
+                                                                <option value="3">3</option>
+                                                                <option value="4">4</option>
+                                                                <option value="5">5</option>
+                                                                <option value="6">6</option>
+                                                                <option value="7">7</option>
+                                                                <option value="8">8</option>
+                                                                <option value="9">9</option>
+                                                                <option value="10">10</option>
+                                                                <option value="11">11</option>
+                                                                <option value="12">12</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventMinute4" class="userEventData">
+                                                                <option value="None">Min</option>
+                                                                <option value="0">00</option>
+                                                                <option value="5">05</option>
+                                                                <option value="10">10</option>
+                                                                <option value="15">15</option>
+                                                                <option value="20">20</option>
+                                                                <option value="25">25</option>
+                                                                <option value="30">30</option>
+                                                                <option value="35">35</option>
+                                                                <option value="40">40</option>
+                                                                <option value="45">45</option>
+                                                                <option value="50">50</option>
+                                                                <option value="55">55</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="control">
+                                                            <label class="radio">
+                                                            <input type="radio" name="userMornAft4" id="userAM4" value="AM" checked="true" class="userEventData">AM</label>
+                                                            <label class="radio"><input type="radio" name="userMornAft4" id="userPM4" value="PM" class="userEventData">PM</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Message -->
+                                    <div>
+                                        <div class="mt-2">
+                                            Message:
+                                        </div>
+                                        <div>
+                                            <input class="input nedcare-input mt-1 userMessageEvent userEventData" placeholder="Message" id="userEventMessage4" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <!-- Frequency -->
+                                    <div>
+                                        <div class="mt-2 mb-2">
+                                            Frequency
+                                        </div>
+                                        <div class="columns is-mobile is-variable is-1 userEventDays">
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSu4" class="userEventData">Su</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqMo4" class="userEventData">M</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTu4" class="userEventData">Tu</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqWe4" class="userEventData">W</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTh4" class="userEventData">T</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqFr4" class="userEventData">F</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSa4" class="userEventData">S</label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- ***** USER EVENT5 ***** -->
+                            <div class="userEvent" id="userEvent5" style="display: none;">
+                                <!-- Header -->
+                                <div class="level is-mobile mt-4">
+                                    <div class="level-left">
+                                        <div class="level-item">
+                                            <div class="ned-title has-text-weight-semibold has-text-left is-size-4 mt-4 userEventEntry">
+                                                Event
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="level-right">
+                                        <div class="level-item">
+                                            <button class="button nedcare-button has-text-weight-semibold userDeleteEvent" id="userEventDelete5">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Body -->
+                                <div class="" id="userEventEntry5">
+                                    <!-- Time -->
+                                    <div class="level is-mobile">
+                                        <div class="level-left">
+                                            <div class="mt-4 mr-2">
+                                                Time:
+                                            </div>
+                                            <div class="level is-mobile mt-4">
+                                                <div class="level-left">
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventHour5" class="userEventData">
+                                                                <option value="None">Hour</option>
+                                                                <option value="1">1</option>
+                                                                <option value="2">2</option>
+                                                                <option value="3">3</option>
+                                                                <option value="4">4</option>
+                                                                <option value="5">5</option>
+                                                                <option value="6">6</option>
+                                                                <option value="7">7</option>
+                                                                <option value="8">8</option>
+                                                                <option value="9">9</option>
+                                                                <option value="10">10</option>
+                                                                <option value="11">11</option>
+                                                                <option value="12">12</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventMinute5" class="userEventData">
+                                                                <option value="None">Min</option>
+                                                                <option value="0">00</option>
+                                                                <option value="5">05</option>
+                                                                <option value="10">10</option>
+                                                                <option value="15">15</option>
+                                                                <option value="20">20</option>
+                                                                <option value="25">25</option>
+                                                                <option value="30">30</option>
+                                                                <option value="35">35</option>
+                                                                <option value="40">40</option>
+                                                                <option value="45">45</option>
+                                                                <option value="50">50</option>
+                                                                <option value="55">55</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="control">
+                                                            <label class="radio">
+                                                            <input type="radio" name="userMornAft5" id="userAM5" value="AM" checked="true" class="userEventData">AM</label>
+                                                            <label class="radio"><input type="radio" name="userMornAft5" id="userPM5" value="PM" class="userEventData">PM</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Message -->
+                                    <div>
+                                        <div class="mt-2">
+                                            Message:
+                                        </div>
+                                        <div>
+                                            <input class="input nedcare-input mt-1 userMessageEvent userEventData" placeholder="Message" id="userEventMessage5" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <!-- Frequency -->
+                                    <div>
+                                        <div class="mt-2 mb-2">
+                                            Frequency
+                                        </div>
+                                        <div class="columns is-mobile is-variable is-1 userEventDays">
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSu5" class="userEventData">Su</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqMo5" class="userEventData">M</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTu5" class="userEventData">Tu</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqWe5" class="userEventData">W</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTh5" class="userEventData">T</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqFr5" class="userEventData">F</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSa5" class="userEventData">S</label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- ***** USER EVENT6 ***** -->
+                            <div class="userEvent" id="userEvent6" style="display: none;">
+                                <!-- Header -->
+                                <div class="level is-mobile mt-4">
+                                    <div class="level-left">
+                                        <div class="level-item">
+                                            <div class="ned-title has-text-weight-semibold has-text-left is-size-4 mt-4 userEventEntry">
+                                                Event
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="level-right">
+                                        <div class="level-item">
+                                            <button class="button nedcare-button has-text-weight-semibold userDeleteEvent" id="userEventDelete6">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Body -->
+                                <div class="" id="userEventEntry6">
+                                    <!-- Time -->
+                                    <div class="level is-mobile">
+                                        <div class="level-left">
+                                            <div class="mt-4 mr-2">
+                                                Time:
+                                            </div>
+                                            <div class="level is-mobile mt-4">
+                                                <div class="level-left">
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventHour6" class="userEventData">
+                                                                <option value="None">Hour</option>
+                                                                <option value="1">1</option>
+                                                                <option value="2">2</option>
+                                                                <option value="3">3</option>
+                                                                <option value="4">4</option>
+                                                                <option value="5">5</option>
+                                                                <option value="6">6</option>
+                                                                <option value="7">7</option>
+                                                                <option value="8">8</option>
+                                                                <option value="9">9</option>
+                                                                <option value="10">10</option>
+                                                                <option value="11">11</option>
+                                                                <option value="12">12</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventMinute6" class="userEventData">
+                                                                <option value="None">Min</option>
+                                                                <option value="0">00</option>
+                                                                <option value="5">05</option>
+                                                                <option value="10">10</option>
+                                                                <option value="15">15</option>
+                                                                <option value="20">20</option>
+                                                                <option value="25">25</option>
+                                                                <option value="30">30</option>
+                                                                <option value="35">35</option>
+                                                                <option value="40">40</option>
+                                                                <option value="45">45</option>
+                                                                <option value="50">50</option>
+                                                                <option value="55">55</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="control">
+                                                            <label class="radio">
+                                                            <input type="radio" name="userMornAft6" id="userAM6" value="AM" checked="true" class="userEventData">AM</label>
+                                                            <label class="radio"><input type="radio" name="userMornAft6" id="userPM6" value="PM" class="userEventData">PM</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Message -->
+                                    <div>
+                                        <div class="mt-2">
+                                            Message:
+                                        </div>
+                                        <div>
+                                            <input class="input nedcare-input mt-1 userMessageEvent userEventData" placeholder="Message" id="userEventMessage6" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <!-- Frequency -->
+                                    <div>
+                                        <div class="mt-2 mb-2">
+                                            Frequency
+                                        </div>
+                                        <div class="columns is-mobile is-variable is-1 userEventDays">
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSu6" class="userEventData">Su</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqMo6" class="userEventData">M</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTu6" class="userEventData">Tu</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqWe6" class="userEventData">W</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTh6" class="userEventData">T</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqFr6" class="userEventData">F</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSa6" class="userEventData">S</label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- ***** USER EVENT7 ***** -->
+                            <div class="userEvent" id="userEvent7" style="display: none;">
+                                <!-- Header -->
+                                <div class="level is-mobile mt-4">
+                                    <div class="level-left">
+                                        <div class="level-item">
+                                            <div class="ned-title has-text-weight-semibold has-text-left is-size-4 mt-4 userEventEntry">
+                                                Event
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="level-right">
+                                        <div class="level-item">
+                                            <button class="button nedcare-button has-text-weight-semibold userDeleteEvent" id="userEventDelete7">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Body -->
+                                <div class="" id="userEventEntry7">
+                                    <!-- Time -->
+                                    <div class="level is-mobile">
+                                        <div class="level-left">
+                                            <div class="mt-4 mr-2">
+                                                Time:
+                                            </div>
+                                            <div class="level is-mobile mt-4">
+                                                <div class="level-left">
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventHour7" class="userEventData">
+                                                                <option value="None">Hour</option>
+                                                                <option value="1">1</option>
+                                                                <option value="2">2</option>
+                                                                <option value="3">3</option>
+                                                                <option value="4">4</option>
+                                                                <option value="5">5</option>
+                                                                <option value="6">6</option>
+                                                                <option value="7">7</option>
+                                                                <option value="8">8</option>
+                                                                <option value="9">9</option>
+                                                                <option value="10">10</option>
+                                                                <option value="11">11</option>
+                                                                <option value="12">12</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventMinute7" class="userEventData">
+                                                                <option value="None">Min</option>
+                                                                <option value="0">00</option>
+                                                                <option value="5">05</option>
+                                                                <option value="10">10</option>
+                                                                <option value="15">15</option>
+                                                                <option value="20">20</option>
+                                                                <option value="25">25</option>
+                                                                <option value="30">30</option>
+                                                                <option value="35">35</option>
+                                                                <option value="40">40</option>
+                                                                <option value="45">45</option>
+                                                                <option value="50">50</option>
+                                                                <option value="55">55</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="control">
+                                                            <label class="radio">
+                                                            <input type="radio" name="userMornAft7" id="userAM7" value="AM" checked="true" class="userEventData">AM</label>
+                                                            <label class="radio"><input type="radio" name="userMornAft7" id="userPM7" value="PM" class="userEventData">PM</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Message -->
+                                    <div>
+                                        <div class="mt-2">
+                                            Message:
+                                        </div>
+                                        <div>
+                                            <input class="input nedcare-input mt-1 userMessageEvent userEventData" placeholder="Message" id="userEventMessage7" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <!-- Frequency -->
+                                    <div>
+                                        <div class="mt-2 mb-2">
+                                            Frequency
+                                        </div>
+                                        <div class="columns is-mobile is-variable is-1 userEventDays">
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSu7" class="userEventData">Su</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqMo7" class="userEventData">M</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTu7" class="userEventData">Tu</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqWe7" class="userEventData">W</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTh7" class="userEventData">T</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqFr7" class="userEventData">F</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSa7" class="userEventData">S</label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- ***** USER EVENT8 ***** -->
+                            <div class="userEvent" id="userEvent8" style="display: none;">
+                                <!-- Header -->
+                                <div class="level is-mobile mt-4">
+                                    <div class="level-left">
+                                        <div class="level-item">
+                                            <div class="ned-title has-text-weight-semibold has-text-left is-size-4 mt-4 userEventEntry">
+                                                Event
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="level-right">
+                                        <div class="level-item">
+                                            <button class="button nedcare-button has-text-weight-semibold userDeleteEvent" id="userEventDelete8">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Body -->
+                                <div class="" id="userEventEntry8">
+                                    <!-- Time -->
+                                    <div class="level is-mobile">
+                                        <div class="level-left">
+                                            <div class="mt-4 mr-2">
+                                                Time:
+                                            </div>
+                                            <div class="level is-mobile mt-4">
+                                                <div class="level-left">
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventHour8" class="userEventData">
+                                                                <option value="None">Hour</option>
+                                                                <option value="1">1</option>
+                                                                <option value="2">2</option>
+                                                                <option value="3">3</option>
+                                                                <option value="4">4</option>
+                                                                <option value="5">5</option>
+                                                                <option value="6">6</option>
+                                                                <option value="7">7</option>
+                                                                <option value="8">8</option>
+                                                                <option value="9">9</option>
+                                                                <option value="10">10</option>
+                                                                <option value="11">11</option>
+                                                                <option value="12">12</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventMinute8" class="userEventData">
+                                                                <option value="None">Min</option>
+                                                                <option value="0">00</option>
+                                                                <option value="5">05</option>
+                                                                <option value="10">10</option>
+                                                                <option value="15">15</option>
+                                                                <option value="20">20</option>
+                                                                <option value="25">25</option>
+                                                                <option value="30">30</option>
+                                                                <option value="35">35</option>
+                                                                <option value="40">40</option>
+                                                                <option value="45">45</option>
+                                                                <option value="50">50</option>
+                                                                <option value="55">55</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="control">
+                                                            <label class="radio">
+                                                            <input type="radio" name="userMornAft8" id="userAM8" value="AM" checked="true" class="userEventData">AM</label>
+                                                            <label class="radio"><input type="radio" name="userMornAft8" id="userPM8" value="PM" class="userEventData">PM</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Message -->
+                                    <div>
+                                        <div class="mt-2">
+                                            Message:
+                                        </div>
+                                        <div>
+                                            <input class="input nedcare-input mt-1 userMessageEvent userEventData" placeholder="Message" id="userEventMessage8" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <!-- Frequency -->
+                                    <div>
+                                        <div class="mt-2 mb-2">
+                                            Frequency
+                                        </div>
+                                        <div class="columns is-mobile is-variable is-1 userEventDays">
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSu8" class="userEventData">Su</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqMo8" class="userEventData">M</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTu8" class="userEventData">Tu</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqWe8" class="userEventData">W</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTh8" class="userEventData">T</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqFr8" class="userEventData">F</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSa8" class="userEventData">S</label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- ***** USER EVENT9 ***** -->
+                            <div class="userEvent" id="userEvent9" style="display: none;">
+                                <!-- Header -->
+                                <div class="level is-mobile mt-4">
+                                    <div class="level-left">
+                                        <div class="level-item">
+                                            <div class="ned-title has-text-weight-semibold has-text-left is-size-4 mt-4 userEventEntry">
+                                                Event
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="level-right">
+                                        <div class="level-item">
+                                            <button class="button nedcare-button has-text-weight-semibold userDeleteEvent" id="userEventDelete9">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Body -->
+                                <div class="" id="userEventEntry9">
+                                    <!-- Time -->
+                                    <div class="level is-mobile">
+                                        <div class="level-left">
+                                            <div class="mt-4 mr-2">
+                                                Time:
+                                            </div>
+                                            <div class="level is-mobile mt-4">
+                                                <div class="level-left">
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventHour9" class="userEventData">
+                                                                <option value="None">Hour</option>
+                                                                <option value="1">1</option>
+                                                                <option value="2">2</option>
+                                                                <option value="3">3</option>
+                                                                <option value="4">4</option>
+                                                                <option value="5">5</option>
+                                                                <option value="6">6</option>
+                                                                <option value="7">7</option>
+                                                                <option value="8">8</option>
+                                                                <option value="9">9</option>
+                                                                <option value="10">10</option>
+                                                                <option value="11">11</option>
+                                                                <option value="12">12</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="select">
+                                                            <select id="userEventMinute9" class="userEventData">
+                                                                <option value="None">Min</option>
+                                                                <option value="0">00</option>
+                                                                <option value="5">05</option>
+                                                                <option value="10">10</option>
+                                                                <option value="15">15</option>
+                                                                <option value="20">20</option>
+                                                                <option value="25">25</option>
+                                                                <option value="30">30</option>
+                                                                <option value="35">35</option>
+                                                                <option value="40">40</option>
+                                                                <option value="45">45</option>
+                                                                <option value="50">50</option>
+                                                                <option value="55">55</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-item">
+                                                        <div class="control">
+                                                            <label class="radio">
+                                                            <input type="radio" name="userMornAft9" id="userAM9" value="AM" checked="true" class="userEventData">AM</label>
+                                                            <label class="radio"><input type="radio" name="userMornAft9" id="userPM9" value="PM" class="userEventData">PM</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Message -->
+                                    <div>
+                                        <div class="mt-2">
+                                            Message:
+                                        </div>
+                                        <div>
+                                            <input class="input nedcare-input mt-1 userMessageEvent userEventData" placeholder="Message" id="userEventMessage9" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <!-- Frequency -->
+                                    <div>
+                                        <div class="mt-2 mb-2">
+                                            Frequency
+                                        </div>
+                                        <div class="columns is-mobile is-variable is-1 userEventDays">
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSu9" class="userEventData">Su</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqMo9" class="userEventData">M</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTu9" class="userEventData">Tu</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqWe9" class="userEventData">W</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqTh9" class="userEventData">T</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqFr9" class="userEventData">F</label></div>
+                                            <div class="column is-narrow"><label class="checkbox"><input type="checkbox" id="freqSa9" class="userEventData">S</label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <div id="modalInfo" class="modal nedcare-modal">
+            <div class="modal-background"></div>
+            <div class="modal-card" style="max-width: 90%;">
+                <header class="modal-card-head">
+                    <p id="modalInfoTitle" class="modal-card-title ned-modal-card-title">Modal title</p>
+                    <button class="delete modalClose" aria-label="close"></button>
+                </header>
+                <section id="modalInfoBody" class="modal-card-body">
+                    <!-- Content ... -->
+                </section>
+                <footer class="modal-card-foot">
+                    <div id="dialogCloseHelp">
+                        <button class="button is-success modalClose">Close</button>
+                        <!-- The following should probably be forced in javascript -->
+                        <button class="button is-warning" id="modalHelp">Need Help?</button>
+                    </div>
+                    <div id="dialogYesNo" style="display:none;">
+                        <button class="button is-success" id="modalButtonYes">Yes</button>
+                        <button class="button is-warning" id="modalButtonNo">No</button>
+                    </div>
+                </footer>
+            </div>
+        </div>
+        
+        <div class="modal">
+            <div id="infoMessage" class="modal-card">
+                <div class="modal-card-body">
+                    <div class="columns is-centered">
+                        <div class="column is-4 is-9-mobile has-text-centered">
+                            <div id="infoMessageContents" class="is-size-4-desktop is-size-5-mobile has-text-weight-semibold nedcare-info-message"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </body>
+</html>
